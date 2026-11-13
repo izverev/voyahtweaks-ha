@@ -1,0 +1,102 @@
+climate_start:
+  target:
+    entity:
+      integration: voyahtweaks-ha
+      domain: climate
+  fields:
+    mode:
+      required: false
+      default: temp
+      selector:
+        select:
+          translation_key: climate_mode
+          options: [temp, rapid_cool, rapid_heat]
+    temperature:
+      required: false
+      selector:
+        number:
+          min: 16
+          max: 32
+          step: 0.5
+          unit_of_measurement: "°C"
+    seat_fl:
+      required: false
+      selector:
+        number:
+          min: -3
+          max: 3
+          step: 1
+          mode: box
+    seat_fr:
+      required: false
+      selector:
+        number:
+          min: -3
+          max: 3
+          step: 1
+          mode: box
+    glass_heat:
+      required: false
+      selector:
+        boolean:
+    runtime:
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 120
+          step: 1
+          unit_of_measurement: min
+
+charge_start:
+  target:
+    entity:
+      integration: voyahtweaks-ha
+      domain: switch
+  fields:
+    max_soc:
+      required: false
+      default: 80
+      selector:
+        number:
+          min: 50
+          max: 100
+          step: 1
+          unit_of_measurement: "%"
+
+charge_schedule:
+  target:
+    entity:
+      integration: voyahtweaks-ha
+      domain: switch
+  fields:
+    start:
+      required: true
+      example: "23:00"
+      selector:
+        text:
+    end:
+      required: true
+      example: "06:00"
+      selector:
+        text:
+    max_soc:
+      required: false
+      default: 80
+      selector:
+        number:
+          min: 50
+          max: 100
+          step: 1
+          unit_of_measurement: "%"
+    cycle:
+      required: false
+      default: false
+      selector:
+        boolean:
+
+charge_cancel_schedule:
+  target:
+    entity:
+      integration: voyahtweaks-ha
+      domain: switch

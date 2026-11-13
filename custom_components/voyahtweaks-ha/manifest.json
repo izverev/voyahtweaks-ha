@@ -1,0 +1,14 @@
+{
+  "domain": "voyahtweaks-ha",
+  "name": "VoyahTweaks",
+  "codeowners": ["@izverev"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/izverev/voyahtweaks-ha",
+  "integration_type": "device",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/izverev/voyahtweaks-ha/issues",
+  "loggers": ["custom_components.voyahtweaks-ha"],
+  "requirements": [],
+  "version": "0.1.0"
+}

@@ -1,0 +1,479 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Sign in to Voyahtweaks",
+        "description": "Enter your app.voyahtweaks.ru username and password. The VIN is detected automatically.",
+        "data": {
+          "username": "Username",
+          "password": "Password"
+        }
+      },
+      "verify": {
+        "title": "Confirm your email",
+        "description": "A code was sent to {email}. Enter it below. To get a new code, tick “Resend code” and submit.",
+        "data": {
+          "code": "Code from the email",
+          "resend": "Resend code"
+        }
+      },
+      "vehicle": {
+        "title": "Choose a vehicle",
+        "description": "Your profile has several vehicles. Pick one.",
+        "data": {
+          "vin": "Vehicle"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate",
+        "description": "The session for {username} expired. Enter the password again.",
+        "data": {
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid username or password",
+      "cannot_connect": "Cannot connect to Voyahtweaks",
+      "invalid_code": "Invalid or expired code",
+      "resend_failed": "Could not resend the code. Try again later.",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This vehicle is already configured",
+      "no_vehicles": "No enabled vehicles in the profile",
+      "invalid_auth": "Authentication failed",
+      "cannot_connect": "Cannot connect to Voyahtweaks",
+      "unknown": "Unexpected error",
+      "reauth_successful": "Re-authentication successful"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "VoyahTweaks options",
+        "description": "The API is never polled more than once per minute.",
+        "data": {
+          "scan_interval_min": "Polling interval",
+          "stale_after_min": "Treat data as stale after (min)",
+          "detailed_diagnostics": "Detailed battery diagnostics",
+          "cell_sensors": "Individual cell sensors (up to 99)",
+          "enable_commands": "Allow vehicle control (locks, windows, climate, charging…)",
+          "enable_dangerous_commands": "Allow keyless start (requires vehicle control)"
+        },
+        "data_description": {
+          "enable_commands": "Commands are really sent to the vehicle. Enable only if you trust every user of this Home Assistant.",
+          "enable_dangerous_commands": "Adds a button that can start the vehicle."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "commands_disabled": {
+      "message": "Vehicle control is disabled. Enable it in the integration options."
+    },
+    "dangerous_disabled": {
+      "message": "This command can start the vehicle and is disabled. Enable it separately in the integration options."
+    },
+    "command_auth": {
+      "message": "The Voyahtweaks session is no longer valid; re-authentication is required."
+    },
+    "command_timeout": {
+      "message": "The vehicle did not confirm the command in time (last status: {status}). It may still be executed later."
+    },
+    "command_error": {
+      "message": "The server rejected the command: {reason} (HTTP {status})."
+    },
+    "command_failed": {
+      "message": "Command failed: {reason}"
+    },
+    "command_no_response": {
+      "message": "The vehicle did not confirm the command."
+    },
+    "command_expired": {
+      "message": "The command was not delivered (expired)."
+    }
+  },
+  "services": {
+    "climate_start": {
+      "name": "Start climate",
+      "description": "Starts the climate with the options supported by the Voyahtweaks app.",
+      "fields": {
+        "mode": {
+          "name": "Mode",
+          "description": "temp keeps a target temperature; rapid_cool / rapid_heat cool or heat quickly."
+        },
+        "temperature": {
+          "name": "Temperature",
+          "description": "Only for mode temp."
+        },
+        "seat_fl": {
+          "name": "Driver seat",
+          "description": "-3 (ventilation) to 3 (heating), 0 is off."
+        },
+        "seat_fr": {
+          "name": "Passenger seat",
+          "description": "-3 (ventilation) to 3 (heating), 0 is off."
+        },
+        "glass_heat": {
+          "name": "Windshield heating",
+          "description": "Heating modes only."
+        },
+        "runtime": {
+          "name": "Run time",
+          "description": "Minutes."
+        }
+      }
+    },
+    "charge_start": {
+      "name": "Start charging",
+      "description": "Starts charging now up to the given level.",
+      "fields": {
+        "max_soc": {
+          "name": "Target SOC",
+          "description": "50 to 100 %."
+        }
+      }
+    },
+    "charge_schedule": {
+      "name": "Schedule charging",
+      "description": "Sets a charging window.",
+      "fields": {
+        "start": {
+          "name": "Start",
+          "description": "Time as HH:MM."
+        },
+        "end": {
+          "name": "End",
+          "description": "Time as HH:MM."
+        },
+        "max_soc": {
+          "name": "Target SOC",
+          "description": "50 to 100 %."
+        },
+        "cycle": {
+          "name": "Repeat daily",
+          "description": "Repeat the schedule every day."
+        }
+      }
+    },
+    "charge_cancel_schedule": {
+      "name": "Cancel charging schedule",
+      "description": "Removes the charging schedule.",
+      "fields": {}
+    }
+  },
+  "selector": {
+    "climate_mode": {
+      "options": {
+        "temp": "Hold temperature",
+        "rapid_cool": "Rapid cooling",
+        "rapid_heat": "Rapid heating"
+      }
+    },
+    "scan_interval": {
+      "options": {
+        "1": "1 minute",
+        "2": "2 minutes",
+        "5": "5 minutes",
+        "10": "10 minutes",
+        "15": "15 minutes",
+        "30": "30 minutes"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "soc": {
+        "name": "Battery level"
+      },
+      "soh": {
+        "name": "Battery health (SOH)"
+      },
+      "soe": {
+        "name": "State of energy (SOE)"
+      },
+      "residual_energy": {
+        "name": "Residual battery energy"
+      },
+      "range": {
+        "name": "Range"
+      },
+      "range_real": {
+        "name": "Real range"
+      },
+      "range_cluster": {
+        "name": "Range (instrument cluster)"
+      },
+      "mileage": {
+        "name": "Mileage"
+      },
+      "speed": {
+        "name": "Speed"
+      },
+      "hv_voltage": {
+        "name": "High-voltage battery voltage"
+      },
+      "hv_current": {
+        "name": "Battery current"
+      },
+      "battery_power": {
+        "name": "Battery power (raw)"
+      },
+      "pack_temp_avg": {
+        "name": "Battery average temperature"
+      },
+      "pack_temp_min": {
+        "name": "Battery minimum temperature"
+      },
+      "pack_temp_max": {
+        "name": "Battery maximum temperature"
+      },
+      "v12_voltage": {
+        "name": "12 V battery voltage"
+      },
+      "v12_percent": {
+        "name": "12 V battery level"
+      },
+      "v12_soh": {
+        "name": "12 V battery health (SOH)"
+      },
+      "fuel": {
+        "name": "Fuel / range extender reserve"
+      },
+      "charging_power": {
+        "name": "Charging power"
+      },
+      "charge_remaining": {
+        "name": "Time to full charge"
+      },
+      "cabin_temp": {
+        "name": "Cabin temperature"
+      },
+      "ambient_temp": {
+        "name": "Ambient temperature"
+      },
+      "vehicle_state": {
+        "name": "Vehicle state"
+      },
+      "charge_state": {
+        "name": "Charging state"
+      },
+      "charge_type": {
+        "name": "Charger type",
+        "state": {
+          "none": "Not connected",
+          "ac": "Slow (AC)",
+          "dc": "Fast (DC)"
+        }
+      },
+      "window_fl": {
+        "name": "Front left window",
+        "state": {
+          "closed": "Closed",
+          "ajar": "Ajar",
+          "open": "Open"
+        }
+      },
+      "window_fr": {
+        "name": "Front right window",
+        "state": {
+          "closed": "Closed",
+          "ajar": "Ajar",
+          "open": "Open"
+        }
+      },
+      "window_rl": {
+        "name": "Rear left window",
+        "state": {
+          "closed": "Closed",
+          "ajar": "Ajar",
+          "open": "Open"
+        }
+      },
+      "window_rr": {
+        "name": "Rear right window",
+        "state": {
+          "closed": "Closed",
+          "ajar": "Ajar",
+          "open": "Open"
+        }
+      },
+      "sunroof": {
+        "name": "Sunroof",
+        "state": {
+          "closed": "Closed",
+          "vent": "Vent",
+          "open": "Open"
+        }
+      },
+      "sentry": {
+        "name": "Sentry mode",
+        "state": {
+          "off": "Off",
+          "shock_only": "Shock sensor only",
+          "on": "On",
+          "low_battery": "Low battery",
+          "arming": "Arming",
+          "unavailable": "Unavailable",
+          "error": "Error"
+        }
+      },
+      "insulation": {
+        "name": "Battery insulation resistance"
+      },
+      "cell_voltage_max": {
+        "name": "Maximum cell voltage"
+      },
+      "cell_voltage_min": {
+        "name": "Minimum cell voltage"
+      },
+      "cell_voltage_delta": {
+        "name": "Cell voltage spread"
+      },
+      "last_seen": {
+        "name": "Vehicle last seen"
+      },
+      "last_success": {
+        "name": "Last successful API poll"
+      },
+      "telemetry_age": {
+        "name": "Telemetry age"
+      },
+      "cell_temp": {
+        "name": "Cell temperature {index}"
+      },
+      "cell_voltage": {
+        "name": "Cell voltage {index}"
+      },
+      "tire_pressure_fl": {
+        "name": "Front left tire pressure"
+      },
+      "tire_temp_fl": {
+        "name": "Front left tire temperature"
+      },
+      "tire_pressure_fr": {
+        "name": "Front right tire pressure"
+      },
+      "tire_temp_fr": {
+        "name": "Front right tire temperature"
+      },
+      "tire_pressure_rl": {
+        "name": "Rear left tire pressure"
+      },
+      "tire_temp_rl": {
+        "name": "Rear left tire temperature"
+      },
+      "tire_pressure_rr": {
+        "name": "Rear right tire pressure"
+      },
+      "tire_temp_rr": {
+        "name": "Rear right tire temperature"
+      }
+    },
+    "binary_sensor": {
+      "api": {
+        "name": "API reachable"
+      },
+      "online": {
+        "name": "Vehicle online"
+      },
+      "telemetry_fresh": {
+        "name": "Telemetry fresh"
+      },
+      "charging": {
+        "name": "Charging"
+      },
+      "charger_connected": {
+        "name": "Charger connected"
+      },
+      "door_fl": {
+        "name": "Front left door"
+      },
+      "door_fr": {
+        "name": "Front right door"
+      },
+      "door_rl": {
+        "name": "Rear left door"
+      },
+      "door_rr": {
+        "name": "Rear right door"
+      },
+      "tailgate": {
+        "name": "Tailgate"
+      },
+      "lock": {
+        "name": "Lock"
+      },
+      "sentry_active": {
+        "name": "Sentry active"
+      },
+      "climate_remote": {
+        "name": "Remote climate active"
+      },
+      "climate_cooling": {
+        "name": "Cooling"
+      },
+      "climate_heating": {
+        "name": "Heating"
+      },
+      "climate_system": {
+        "name": "Climate system"
+      }
+    },
+    "device_tracker": {
+      "location": {
+        "name": "Location"
+      }
+    },
+    "lock": {
+      "ctl_lock": {
+        "name": "Door lock"
+      }
+    },
+    "cover": {
+      "ctl_windows": {
+        "name": "Windows"
+      },
+      "ctl_sunroof": {
+        "name": "Sunroof"
+      },
+      "ctl_tailgate": {
+        "name": "Tailgate"
+      }
+    },
+    "button": {
+      "btn_find_start": {
+        "name": "Find vehicle (horn and hazards)"
+      },
+      "btn_find_stop": {
+        "name": "Stop find vehicle"
+      },
+      "btn_hazard": {
+        "name": "Hazard lights on"
+      },
+      "btn_windows_vent": {
+        "name": "Vent windows"
+      },
+      "btn_sunroof_vent": {
+        "name": "Vent sunroof"
+      },
+      "btn_keyless_start": {
+        "name": "Keyless start"
+      }
+    },
+    "switch": {
+      "ctl_sentry": {
+        "name": "Sentry mode"
+      },
+      "ctl_charge": {
+        "name": "Charging"
+      }
+    },
+    "climate": {
+      "ctl_climate": {
+        "name": "Climate"
+      }
+    }
+  }
+}
